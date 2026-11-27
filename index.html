@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23123b2e'/%3E%3Ccircle cx='32' cy='26' r='15' fill='white'/%3E%3Ccircle cx='32' cy='26' r='11' fill='none' stroke='%23123b2e' stroke-width='2'/%3E%3Ctext x='32' y='30' font-size='11' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%23123b2e'%3Ekg%3C/text%3E%3Cpath d='M18 46h28l-4 7H22z' fill='white'/%3E%3C/svg%3E">
+<title>Kalkulator Kelapa · Timbang</title>
+<style>
+:root{--bg:#f2f5f1;--card:#fff;--ink:#13221b;--mut:#587064;--line:#d9e2db;--brand:#123b2e;--on:#fff;--soft:#e3eee7;--warn:#7d4700;--warnbg:#fdeed2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="hijau"]{--bg:#f2f5f1;--card:#fff;--ink:#13221b;--mut:#587064;--line:#d9e2db;--brand:#123b2e;--on:#fff;--soft:#e3eee7;--warn:#7d4700;--warnbg:#fdeed2;color-scheme:light}
+:root[data-theme="putih"]{--bg:#f8f8f8;--card:#fff;--ink:#1c1c1c;--mut:#5f6b66;--line:#dcdcdc;--brand:#123b2e;--on:#fff;--soft:#f0f0f0;--warn:#7d4700;--warnbg:#fdeed2;color-scheme:light}
+:root[data-theme="gelap"]{--bg:#0d1511;--card:#16201a;--ink:#e9f0ea;--mut:#9fb3a8;--line:#27372d;--brand:#2b8f69;--soft:#1c2c23;--warn:#f1c47c;--warnbg:#3a2c12;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);overflow-x:hidden} /* v1.4: halaman tidak boleh lebih lebar dari layar HP */
+*{box-sizing:border-box}
+body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;padding:16px 20px;flex-wrap:wrap;background:var(--card);border-bottom:1px solid var(--line)}
+header .htitle{flex:1 1 220px;min-width:0}
+@media(max-width:560px){header .htitle{flex:1 1 100%}}
+header b{font-size:clamp(22px,5.5vw,28px);line-height:1.2}header small{display:block;color:var(--mut);font-size:15px;margin-top:2px}
+.tag{background:var(--soft);color:var(--ink);padding:4px 12px;border-radius:99px;font-size:14px}
+main{max-width:1040px;margin:0 auto;padding:16px;display:grid;gap:16px}
+main>*{min-width:0} /* v1.4: grid item boleh menyusut, jangan paksa lebar grid */
+@media(min-width:880px) and (orientation:landscape){main{grid-template-columns:1fr 1fr;align-items:start}.full{grid-column:1/-1}} /* v1.4: 2 kolom hanya landscape, HP portrait selalu 1 kolom */
+/* Tablet (10 inci, landscape utama; portrait tetap rapi) */
+/* Ukuran dinamis (v1.2): keypad/display/tombol Cetak ikut tinggi layar (vh), bukan px tetap —
+   di tablet landscape yang pendek tidak lagi mendominasi layar. */
+@media(min-width:768px){main{padding:20px}}
+@media(min-width:880px){main{max-width:1180px;gap:20px}.card{padding:22px}}
+@media(min-width:1024px) and (orientation:landscape){main{max-width:1240px;grid-template-columns:1.05fr .95fr;gap:24px}header{padding:18px 28px}header b{font-size:28px}.stage{padding:20px}}
+@media(min-width:1280px){main{max-width:1280px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+h2{margin:0 0 12px;font-size:18px;font-weight:600}
+.total{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.total .n{font-size:40px;font-weight:700;line-height:1.1}.total span{color:var(--mut)}
+.disp{background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 16px;text-align:right;font-size:clamp(48px,8vh,64px);font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.disp small{font-size:24px;color:var(--mut);margin-left:6px;font-weight:500}
+.keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px}
+.keys button{height:clamp(48px,8vh,64px);font-size:clamp(22px,3.2vh,28px);font-weight:600}
+button:focus-visible,input:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+label{display:block;font-weight:600;margin:4px 0 6px}
+input{width:100%;font:inherit;font-size:22px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.go{width:100%;margin-top:12px;height:clamp(56px,8vh,68px);font-size:clamp(20px,3vh,26px);font-weight:700;background:var(--brand);color:var(--on);border-color:var(--brand)}
+.go:disabled{opacity:.4;cursor:not-allowed}
+.warn{background:var(--warnbg);color:var(--warn);padding:10px 14px;border-radius:10px;margin-top:10px;display:none}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row button{padding:10px 16px}
+.stage{background:var(--soft);border-radius:12px;padding:16px;display:flex;justify-content:center;min-width:0}
+.paper{width:100%;max-width:calc(var(--cols,32)*1ch + 28px);min-width:0; /* v1.4: slip preview menyusut ke dalam kartu, jangan paksa lebar */background:#fff;color:#111;font:14px/1.45 "Courier New",ui-monospace,monospace;padding:16px 14px;box-shadow:0 0 0 1px #d4d4d4}
+.paper .c{text-align:center}.paper .b{font-weight:700}.paper .big{font-size:44px;font-weight:700;line-height:1.1;margin:6px 0}
+.paper hr{border:0;border-top:1px dashed #555;margin:8px 0}
+.sign{display:flex;justify-content:space-between;gap:10px;margin-top:6px}.sign .ln{border-bottom:1px solid #111;height:56px;width:100px}
+.cap{border:1px dashed #555;width:80px;height:70px;text-align:center;font-size:12px}
+.paper .r{display:flex;justify-content:space-between}
+ul{list-style:none;margin:0;padding:0}li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.delbtn{color:#a83232;border-color:#e3b7b7}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal.on{display:flex}.modal .card{max-width:440px;width:100%}
+li:first-child{border-top:0}li span{color:var(--mut)}
+.empty{color:var(--mut)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--brand);color:var(--on);padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
+.toast.on{opacity:1}
+.foot{color:var(--mut);font-size:14px;text-align:center;padding:8px 16px 24px}
+.foot button{border:0;background:none;color:var(--mut);text-decoration:underline;padding:0}
+[hidden]{display:none!important}
+.roles{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:12px}
+.roles button,.tabs button{border:0;background:none;padding:10px 18px;font-weight:600;color:var(--mut)}
+.roles button{min-height:44px}
+.tabs{display:flex;gap:6px}.tabs button{border:1px solid var(--line);background:var(--card)}
+.roles button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--brand);color:var(--on);border-color:var(--brand)}
+header .htitle{display:flex;gap:10px;align-items:center}
+.appicon{width:40px;height:40px;border-radius:10px;flex-shrink:0}
+.themes{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;color:var(--mut);font-size:14px;padding:0 16px 24px}
+.themes button{padding:8px 14px;font-weight:600}
+.themes button[aria-pressed="true"]{background:var(--brand);color:var(--on);border-color:var(--brand)}
+.cfgwrap{display:grid;gap:24px}@media(min-width:760px) and (orientation:landscape){.cfgwrap{grid-template-columns:1fr auto}}
+.f{margin-bottom:12px}.f input{font-size:18px}
+select{width:100%;font:inherit;font-size:18px;padding:12px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.chk{display:flex;align-items:center;gap:10px;margin:8px 0;font-weight:500}.chk input{width:24px;height:24px;padding:0}
+.hint{color:var(--mut);font-size:14px;margin:12px 0 0}
+</style>
+</head>
+<body>
+<header><div class="htitle"><svg class="appicon" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#123b2e"/><circle cx="32" cy="26" r="15" fill="#fff"/><circle cx="32" cy="26" r="11" fill="none" stroke="#123b2e" stroke-width="2"/><text x="32" y="30" font-size="11" font-family="sans-serif" font-weight="bold" text-anchor="middle" fill="#123b2e">kg</text><path d="M18 46h28l-4 7H22z" fill="#fff"/></svg><div><b>UD Kelapa Kering Denpasar</b><small>Petugas timbang</small></div></div><div class="roles" role="group" aria-label="Masuk sebagai"><button id="r-pet" aria-pressed="true">Petugas</button><button id="r-own" aria-pressed="false">Pemilik</button></div></header>
+<main>
+<nav class="tabs full" id="tabs" hidden><button id="t-timbang" aria-pressed="true">Timbang</button><button id="t-desain" aria-pressed="false">Desain nota</button></nav>
+<section class="card full" id="pin" hidden><h2>Masuk sebagai pemilik</h2><label for="pinin">PIN pemilik</label><input id="pinin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"><div class="warn" id="pinerr">PIN salah. Coba lagi.</div><button class="go" id="pinok" style="height:56px;font-size:20px">Masuk</button><p class="hint">Demo: PIN 1234. Hanya pemilik yang bisa mengubah desain nota dan menghapus riwayat timbangan.</p></section>
+<section class="card full" id="desain" hidden>
+<h2>Desain nota</h2>
+<div class="cfgwrap">
+<div>
+<div class="f"><label for="c-nama">Nama usaha</label><input id="c-nama" maxlength="28"></div>
+<div class="f"><label for="c-alamat">Alamat</label><input id="c-alamat" maxlength="40"></div>
+<div class="f"><label for="c-foot">Baris penutup</label><input id="c-foot" maxlength="32" placeholder="Contoh: Terima kasih"></div>
+<div class="f"><label for="c-cols">Lebar kertas</label><select id="c-cols"><option value="32">58 mm (32 karakter)</option><option value="48">80 mm (48 karakter)</option></select></div>
+<div class="f"><label for="c-h">Ruang paraf dan cap</label><select id="c-h"><option value="50">Rendah</option><option value="70">Sedang</option><option value="90">Tinggi</option></select></div>
+<label class="chk"><input type="checkbox" id="c-shownama">Tampilkan nama pelanggan</label>
+<label class="chk"><input type="checkbox" id="c-cap">Sediakan kotak cap</label>
+<div class="row" style="margin-top:10px"><button id="c-reset">Kembalikan bawaan</button></div>
+<p class="hint">Hanya pemilik yang bisa membuka halaman ini. Perubahan langsung dipakai pada timbang berikutnya.</p>
+</div>
+<div><div class="stage"><div class="paper" id="dpaper"></div></div><p class="hint" style="text-align:center">Contoh: 20 kg atas nama Nengah</p></div>
+</div>
+</section>
+<section class="card full total"><div><span>Total hari ini</span><div class="n" id="tot">0 kg</div></div><div><span id="cnt">0 timbangan</span></div></section>
+
+<section class="card">
+<h2>Timbang baru</h2>
+<div class="disp" id="disp">0<small>kg</small></div>
+<div class="keys" id="keys"></div>
+<label for="nama">Nama (boleh dikosongkan)</label>
+<input id="nama" maxlength="16" placeholder="Contoh: Nengah" autocomplete="off">
+<div class="warn" id="warn">Berat tidak biasa. Periksa lagi sebelum mencetak.</div>
+<button class="go" id="cetak" disabled>Cetak slip</button>
+<p class="hint">Cetak via RawBT di HP Android — install RawBT, pair printer RPP02N di RawBT.</p>
+</section>
+
+<section class="card">
+<h2 id="ptitle">Preview slip</h2>
+<div class="stage"><div class="paper" id="paper"></div></div>
+<div class="row" style="margin-top:12px"><button id="back" style="display:none">Kembali ke timbang baru</button><button id="rekap">Cetak rekap hari ini</button></div>
+</section>
+
+<section class="card full">
+<h2>Timbangan hari ini</h2>
+<ul id="list"></ul>
+</section>
+</main>
+<div class="themes" role="group" aria-label="Tema tampilan"><span>Tema:</span><button type="button" data-theme-btn="hijau" aria-pressed="true">Hijau</button><button type="button" data-theme-btn="putih" aria-pressed="false">Putih</button><button type="button" data-theme-btn="gelap" aria-pressed="false">Gelap</button></div>
+<p class="foot">Cetak via RawBT di HP Android. Data hanya tersimpan di browser ini. <button id="reset">Hapus data demo</button></p>
+<div class="modal" id="delbox"><div class="card"><h2>Hapus timbangan ini?</h2><p id="deltext"></p><p class="hint">Slip kertas yang sudah tercetak tidak bisa ditarik kembali. Yang dihapus hanya catatan di aplikasi — total hari ini akan berkurang. Setelah itu timbang ulang yang benar dan cetak lagi.</p><div class="row"><button id="del-yes" class="delbtn" style="padding:10px 18px;font-weight:700">Ya, hapus</button><button id="del-no" style="padding:10px 18px">Batal</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+var TZ='Asia/Makassar';
+var fD=new Intl.DateTimeFormat('id-ID',{timeZone:TZ,day:'numeric',month:'short',year:'numeric'});
+var fT=new Intl.DateTimeFormat('id-ID',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hour12:false});
+var fK=new Intl.DateTimeFormat('en-CA',{timeZone:TZ});
+function $(s){return document.querySelector(s)}
+function key(t){return fK.format(t)}
+function num(s){return parseFloat(String(s).replace(',','.'))||0}
+function fmt(n){return n.toLocaleString('id-ID',{maximumFractionDigits:1})}
+function terbilang(n){
+  n=Math.floor(n);
+  var s=['nol','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+  if(n<12)return s[n];
+  if(n<20)return terbilang(n-10)+' belas';
+  if(n<100)return terbilang(Math.floor(n/10))+' puluh'+(n%10?' '+terbilang(n%10):'');
+  if(n<200)return 'seratus'+(n%100?' '+terbilang(n%100):'');
+  if(n<1000)return terbilang(Math.floor(n/100))+' ratus'+(n%100?' '+terbilang(n%100):'');
+  if(n<2000)return 'seribu'+(n%1000?' '+terbilang(n%1000):'');
+  if(n<1000000)return terbilang(Math.floor(n/1000))+' ribu'+(n%1000?' '+terbilang(n%1000):'');
+  if(n<1000000000)return terbilang(Math.floor(n/1000000))+' juta'+(n%1000000?' '+terbilang(n%1000000):'');
+  return terbilang(Math.floor(n/1000000000))+' miliar'+(n%1000000000?' '+terbilang(n%1000000000):'');
+}
+function terbilangKg(kg){
+  var v=Math.round(kg*10)/10;
+  var b=Math.floor(v),d=Math.round((v-b)*10);
+  var t=terbilang(b);
+  if(d>0)t+=' koma '+terbilang(d);
+  t+=' kilogram';
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+/* Cetak via RawBT (web): bangun byte ESC/POS lalu lempar lewat Android Intent
+   intent:base64,...#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;
+   Syarat: buka web ini di HP Android, install RawBT, pair RPP02N di RawBT.
+   Printer RPP02N itu Bluetooth Classic, browser tidak bisa langsung ke sana. */
+/* Cetak via RawBT (web): byte ESC/POS yang SAMA PERSIS dengan APK (PrinterManager.kt),
+   supaya struk web dan struk APK keluar identik di printer RPP02N yang sama.
+   Perataan pakai perintah printer ESC a (0 kiri / 1 tengah), bukan spasi manual.
+   intent:base64,...#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;
+   Syarat: buka web ini di HP Android, install RawBT, pair RPP02N di RawBT. */
+function escAscii(s){return String(s).replace(/[·—–]/g,'-').split('').map(function(c){var n=c.charCodeAt(0);return (n>=32&&n<=126)?c:'?'}).join('')}
+function EscPos(cols){this.cols=cols;this.a=[]}
+EscPos.prototype.init=function(){this.a.push(0x1B,0x40)};
+EscPos.prototype.align=function(n){this.a.push(0x1B,0x61,n)};
+EscPos.prototype.bold=function(on){this.a.push(0x1B,0x45,on?1:0)};
+EscPos.prototype.sizeDouble=function(on){this.a.push(0x1D,0x21,on?0x11:0x00)};
+EscPos.prototype.line=function(s){var t=escAscii(s);for(var i=0;i<t.length;i++)this.a.push(t.charCodeAt(i));this.a.push(0x0A)};
+EscPos.prototype.center=function(s){this.align(1);this.line(s);this.align(0)};
+EscPos.prototype.centerBold=function(s){this.align(1);this.bold(true);this.line(s);this.bold(false);this.align(0)};
+EscPos.prototype.dashed=function(){this.align(0);this.line('-'.repeat(this.cols))};
+EscPos.prototype.blank=function(n){for(var i=0;i<(n||1);i++)this.a.push(0x0A)};
+EscPos.prototype.twoCol=function(l,r){var gap=Math.max(1,this.cols-l.length-r.length);this.align(0);this.line(l+' '.repeat(gap)+r)};
+EscPos.prototype.feed=function(n){this.a.push(0x1B,0x64,n)};
+EscPos.prototype.cut=function(){this.a.push(0x1D,0x56,0x00)};
+EscPos.prototype.bytes=function(){return new Uint8Array(this.a)};
+function escReceiptBytes(d,salinan){
+  var e=new EscPos(cfg.cols===32?32:48);
+  e.init();
+  e.centerBold(cfg.nama);
+  e.center(cfg.alamat);
+  e.dashed();
+  e.center(fD.format(d.ts)+' '+fT.format(d.ts));
+  if(salinan)e.centerBold('*** SALINAN ***');
+  if(cfg.shownama)e.center(d.nama?d.nama:'-');
+  e.align(1);e.sizeDouble(true);e.line(fmt(d.kg)+' KG');e.sizeDouble(false);e.align(0);
+  e.center(terbilangKg(d.kg));
+  e.dashed();
+  if(cfg.cap)e.twoCol('Paraf','Cap');else{e.align(0);e.line('Paraf')}
+  e.blank(4);
+  if(cfg.cap)e.twoCol('....................','....................');else{e.align(0);e.line('....................')}
+  if(cfg.foot){e.blank(1);e.center(cfg.foot)}
+  e.feed(4);e.cut();
+  return e.bytes();
+}
+function escRekapBytes(){
+  var e=new EscPos(cfg.cols===32?32:48),t=today();
+  e.init();
+  e.centerBold(cfg.nama);
+  e.center(cfg.alamat);
+  e.dashed();
+  e.centerBold('REKAP HARIAN');
+  e.center(fD.format(Date.now()));
+  e.dashed();
+  if(!t.length){e.center('Belum ada timbangan')}
+  else{t.forEach(function(r,i){e.twoCol((i+1)+'. '+fT.format(r.ts),fmt(r.kg)+' kg')});e.dashed();e.center(t.length+' timbangan');e.align(1);e.sizeDouble(true);e.line(fmt(total())+' KG');e.sizeDouble(false);e.align(0);e.center(terbilangKg(total()))}
+  if(cfg.foot){e.blank(1);e.center(cfg.foot)}
+  e.feed(4);e.cut();
+  return e.bytes();
+}
+function b64bytes(b){var s='';for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s)}
+function printRawBT(bytes){
+  if(!/Android/i.test(navigator.userAgent||'')){toast('Buka web ini di HP Android dan install RawBT dulu');return false}
+  window.location.href='intent:base64,'+b64bytes(bytes)+'#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
+  toast('Dikirim ke RawBT — cek printer');
+  return true;
+}
+function load(){try{return JSON.parse(localStorage.getItem('kk_demo')||'[]')}catch(e){return []}}
+function save(){try{localStorage.setItem('kk_demo',JSON.stringify(recs))}catch(e){}}
+var recs=load(),kg='',mode={t:'live'},tt,DEF={nama:'UD KELAPA KERING',alamat:'Denpasar Utara, Bali',foot:'Terima kasih',cols:48,h:70,shownama:true,cap:true,theme:''},cfg=loadCfg();
+function loadCfg(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('kk_cfg')||'{}'))}catch(e){return Object.assign({},DEF)}}
+
+function today(){var k=key(Date.now());return recs.filter(function(r){return key(r.ts)===k})}
+function total(){return today().reduce(function(a,r){return a+r.kg},0)}
+function head(ts){return '<div class="c b">'+esc(cfg.nama)+'</div><div class="c">'+esc(cfg.alamat)+'</div><hr>'}
+function slip(d,salinan){
+  return head()+'<div class="c">'+fD.format(d.ts)+' · '+fT.format(d.ts)+'</div>'+
+  (salinan?'<div class="c b">*** SALINAN ***</div>':'')+
+  (cfg.shownama?'<div class="c" style="font-size:18px;margin-top:4px">'+(d.nama?esc(d.nama):'-')+'</div>':'')+
+  '<div class="c big">'+fmt(d.kg)+' KG</div>'+(d.kg>0?'<div class="c" style="font-style:italic;font-size:13px;margin-top:2px">'+terbilangKg(d.kg)+'</div>':'')+'<hr>'+
+  '<div class="sign"><div>Paraf<div class="ln" style="height:'+cfg.h+'px"></div></div>'+(cfg.cap?'<div class="cap" style="height:'+cfg.h+'px">Cap</div>':'')+'</div>'+(cfg.foot?'<div class="c" style="margin-top:8px">'+esc(cfg.foot)+'</div>':'');
+}
+function rekapSlip(){
+  var t=today(),h=head()+'<div class="c b">REKAP HARIAN</div><div class="c">'+fD.format(Date.now())+'</div><hr>';
+  if(!t.length)return h+'<div class="c">Belum ada timbangan</div>';
+  t.forEach(function(r,i){h+='<div class="r"><span>'+(i+1)+'. '+fT.format(r.ts)+'</span><span>'+fmt(r.kg)+' kg</span></div>'});
+  return h+'<hr><div class="c">'+t.length+' timbangan</div><div class="c big">'+fmt(total())+' KG</div><div class="c" style="font-style:italic;font-size:13px">'+terbilangKg(total())+'</div>';
+}
+function render(){
+  var v=num(kg);
+  $('#disp').innerHTML=(kg===''?'0':esc(kg))+'<small>kg</small>';
+  $('#cetak').disabled=v<=0;
+  $('#cetak').textContent=v>1000?'Tetap cetak':'Cetak slip';
+  $('#warn').style.display=v>1000?'block':'none';
+  var p=$('#paper'),back=$('#back');p.style.setProperty('--cols',cfg.cols);
+  if(mode.t==='live'){$('#ptitle').textContent='Preview slip';p.innerHTML=slip({ts:Date.now(),kg:v,nama:$('#nama').value.trim()});back.style.display='none'}
+  else if(mode.t==='salinan'){$('#ptitle').textContent='Cetak ulang';p.innerHTML=slip(mode.rec,true);back.style.display=''}
+  else{$('#ptitle').textContent='Rekap hari ini';p.innerHTML=rekapSlip();back.style.display=''}
+  var t=today();
+  $('#tot').textContent=fmt(total())+' kg';
+  $('#cnt').textContent=t.length+' timbangan';
+  var l=$('#list');l.innerHTML='';
+  if(!t.length){l.innerHTML='<li class="empty">Belum ada timbangan. Ketik berat di atas, lalu tekan Cetak slip.</li>';return}
+  t.slice().reverse().forEach(function(r,i){
+    var n=t.length-i,li=document.createElement('li');
+    li.innerHTML='<div><b>'+fmt(r.kg)+' kg</b> <span>'+(r.nama?esc(r.nama):'tanpa nama')+' · '+fT.format(r.ts)+' · no. '+n+'</span></div>';
+    var b=document.createElement('button');b.textContent='Cetak ulang';b.style.padding='8px 14px';
+    b.onclick=function(){mode={t:'salinan',rec:r};render();printRawBT(escReceiptBytes(r,true));window.scrollTo({top:0,behavior:'smooth'})};
+    var acts=document.createElement('div');acts.style.display='flex';acts.style.gap='8px';acts.style.flexShrink='0';
+    acts.appendChild(b);
+    var db=document.createElement('button');db.textContent='Hapus';db.className='delbtn';db.style.padding='8px 14px';
+    db.onclick=function(){requestDelete(r)};
+    acts.appendChild(db);li.appendChild(acts);l.appendChild(li);
+  });
+}
+function toast(m){var e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){e.classList.remove('on')},2600)}
+function add(c){
+  if(c==='del'){kg=kg.slice(0,-1)}
+  else if(c===','){if(kg.indexOf(',')<0)kg=(kg===''?'0':kg)+','}
+  else{if(kg.length<7&&!(kg.indexOf(',')>=0&&kg.split(',')[1].length>=1))kg+=c}
+  if(mode.t!=='live')mode={t:'live'};render();
+}
+function cetak(){
+  var v=num(kg);if(v<=0)return;
+  var d={ts:Date.now(),kg:v,nama:$('#nama').value.trim()};
+  recs.push(d);save();
+  kg='';$('#nama').value='';mode={t:'live'};render();
+  printRawBT(escReceiptBytes(d,false));
+}
+var keys=['7','8','9','4','5','6','1','2','3',',','0','del'];
+keys.forEach(function(k){var b=document.createElement('button');b.textContent=k==='del'?'Hapus':k;b.setAttribute('aria-label',k==='del'?'Hapus angka terakhir':k);b.onclick=function(){add(k)};$('#keys').appendChild(b)});
+$('#cetak').onclick=cetak;
+$('#rekap').onclick=function(){mode={t:'rekap'};render();printRawBT(escRekapBytes())};
+$('#back').onclick=function(){mode={t:'live'};render()};
+$('#nama').addEventListener('input',function(){if(mode.t!=='live')mode={t:'live'};render()});
+$('#reset').onclick=function(){recs=[];save();kg='';mode={t:'live'};render();toast('Data demo dihapus')};
+document.addEventListener('keydown',function(e){
+  var t=e.target;
+  if(t.id==='nama'){if(e.key==='Enter'){e.preventDefault();$('#cetak').focus()}return}
+  if(t.tagName==='INPUT'||t.tagName==='SELECT')return;
+  if(!$('#desain').hidden||!$('#pin').hidden)return;
+  if(t.tagName==='BUTTON'&&e.key==='Enter')return;
+  if(/^[0-9]$/.test(e.key)){add(e.key)}
+  else if(e.key===','||e.key==='.'){add(',')}
+  else if(e.key==='Backspace'){add('del')}
+  else if(e.key==='Enter'){e.preventDefault();$('#nama').focus()}
+});
+setInterval(function(){if(mode.t==='live')render()},20000);
+var role='pet',unlocked=false,view='timbang',pendingDel=null;
+function closeDelbox(){$('#delbox').classList.remove('on')}
+function requestDelete(r){pendingDel=r.ts;$('#deltext').textContent=fmt(r.kg)+' kg'+(r.nama?' \u00b7 '+r.nama:'')+' \u00b7 '+fT.format(r.ts)+' \u2014 hapus catatan ini dari riwayat hari ini?';$('#delbox').classList.add('on')}
+function doDelete(ts){var i=recs.findIndex(function(x){return x.ts===ts});if(i<0){toast('Timbangan sudah tidak ada');return}var k=recs[i].kg;recs.splice(i,1);save();mode={t:'live'};render();toast('Timbangan '+fmt(k)+' kg dihapus oleh pemilik. Total hari ini '+fmt(total())+' kg \u2014 timbang ulang yang benar lalu cetak lagi.')}
+$('#del-no').onclick=function(){pendingDel=null;closeDelbox()};
+$('#del-yes').onclick=function(){closeDelbox();if(role==='own'&&unlocked){var ts=pendingDel;pendingDel=null;doDelete(ts)}else{unlocked=false;role='own';view='timbang';show();toast('Masukkan PIN pemilik untuk menghapus timbangan ini');setTimeout(function(){$('#pinin').focus()},50)}};
+function show(){
+  var own=role==='own'&&unlocked,pinv=role==='own'&&!unlocked,d=own&&view==='desain';
+  $('#r-pet').setAttribute('aria-pressed',role==='pet');$('#r-own').setAttribute('aria-pressed',role==='own');
+  $('#tabs').hidden=!own;$('#pin').hidden=!pinv;$('#desain').hidden=!d;
+  document.querySelectorAll('main>section:not(#pin):not(#desain)').forEach(function(s){s.hidden=pinv||d});
+  $('#t-timbang').setAttribute('aria-pressed',!d);$('#t-desain').setAttribute('aria-pressed',d);
+  if(d){dfill();dprev()}
+}
+function dfill(){$('#c-nama').value=cfg.nama;$('#c-alamat').value=cfg.alamat;$('#c-foot').value=cfg.foot;$('#c-cols').value=cfg.cols;$('#c-h').value=cfg.h;$('#c-shownama').checked=cfg.shownama;$('#c-cap').checked=cfg.cap}
+function dprev(){var p=$('#dpaper');p.style.setProperty('--cols',cfg.cols);p.innerHTML=slip({ts:Date.now(),kg:20,nama:'Nengah'})}
+function dread(){cfg.nama=$('#c-nama').value;cfg.alamat=$('#c-alamat').value;cfg.foot=$('#c-foot').value;cfg.cols=+$('#c-cols').value;cfg.h=+$('#c-h').value;cfg.shownama=$('#c-shownama').checked;cfg.cap=$('#c-cap').checked;try{localStorage.setItem('kk_cfg',JSON.stringify(cfg))}catch(e){}dprev();render()}
+['c-nama','c-alamat','c-foot','c-cols','c-h','c-shownama','c-cap'].forEach(function(i){$('#'+i).addEventListener('input',dread);$('#'+i).addEventListener('change',dread)});
+$('#c-reset').onclick=function(){cfg=Object.assign({},DEF);dfill();dread();toast('Desain nota dikembalikan ke bawaan')};
+$('#r-pet').onclick=function(){pendingDel=null;role='pet';view='timbang';show()};
+$('#r-own').onclick=function(){role='own';show();if(!unlocked)$('#pinin').focus()};
+$('#pinok').onclick=function(){if($('#pinin').value==='1234'){unlocked=true;$('#pinin').value='';$('#pinerr').style.display='none';if(pendingDel!=null){var ts=pendingDel;pendingDel=null;view='timbang';show();doDelete(ts)}else{view='desain';show()}}else{$('#pinerr').style.display='block'}};
+$('#pinin').addEventListener('keydown',function(e){if(e.key==='Enter')$('#pinok').click()});
+$('#t-timbang').onclick=function(){view='timbang';show()};
+$('#t-desain').onclick=function(){view='desain';show()};
+function applyTheme(){var t=cfg.theme;if(t!=='hijau'&&t!=='putih'&&t!=='gelap'){t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'gelap':'hijau'}document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('[data-theme-btn]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-theme-btn')===t)})}
+function setTheme(t){cfg.theme=t;try{localStorage.setItem('kk_cfg',JSON.stringify(cfg))}catch(e){}applyTheme()}
+document.querySelectorAll('[data-theme-btn]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.getAttribute('data-theme-btn'))})});
+applyTheme();
+render();
+</script>
+</body>
+</html>
